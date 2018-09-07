@@ -1,19 +1,19 @@
-import {SIGNED_IN} from '../constants';
-
+import {SET_USER} from '../constants';
 
 let user={
-	email:null
+  email:null
 }
 
 export default(state=user, action)=>{
-	switch(action.type){
-		case SIGNED_IN:
-			const {email}= action;
-			user={
-				email
-			}
-			return user;
-		default:
-			return state;
-	}
+  switch(action.type){
+    case SET_USER:
+      const {email}= action;
+      user={
+        email
+      }
+      return user;
+    default:
+      return state;
+
+  }
 }

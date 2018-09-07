@@ -1,15 +1,12 @@
 import * as firebase from 'firebase';
 
 const config = {
-    apiKey: "AIzaSyD-eVCCX4V09hbUBWpOkWm3ii8W1JenuQY",
-    authDomain: "facebook-1c044.firebaseapp.com",
-    databaseURL: "https://facebook-1c044.firebaseio.com",
-    projectId: "facebook-1c044",
-    storageBucket: "",
-    messagingSenderId: "131971437378"
+    apiKey: "AIzaSyBDA8r6eZoI-6GjHVItXeXWwWjav6fRouA",
+    authDomain: "entryclock-b0ecd.firebaseapp.com",
+    databaseURL: "https://entryclock-b0ecd.firebaseio.com",
+    projectId: "entryclock-b0ecd",
+    storageBucket: "entryclock-b0ecd.appspot.com",
+    messagingSenderId: "709432197285"
   };
- 
-export const firebaseApp= firebase.initializeApp(config);
-export const postRef = firebase.database().ref('posts');
-export const commentRef = firebase.database().ref('comments');
-export const replyRef =firebase.database().ref('reply');
+export const firebaseApp=firebase.initializeApp(config);
+export const momentRef= firebase.database().ref('moments');
