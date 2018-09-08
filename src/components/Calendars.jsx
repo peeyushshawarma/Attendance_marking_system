@@ -6,8 +6,7 @@ import InfiniteCalendar from 'react-infinite-calendar';
 import {Calendar, defaultMultipleDateInterpolation, withMultipleDates} from 'react-infinite-calendar';
 import {connect} from 'react-redux';
 import 'react-infinite-calendar/styles.css'; // only needs to be imported once
-import {logUser} from '../actions';
-import {callmoment} from '../actions';
+import {logUser,callmoment} from '../actions';
 import {momentRef} from '../firebase';
 import moment from 'moment';
 

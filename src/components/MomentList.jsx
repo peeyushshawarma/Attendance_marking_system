@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import {momentRef} from '../firebase';
-import {callmoment} from '../actions';
+import {callmoment,selectmonth} from '../actions';
 import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 import _ from 'lodash';
 import moment from 'moment';
-import {selectmonth} from '../actions';
-import {bindActionCreators} from 'redux';
+
 
 
 //this is to gain access to the database data and display it on screen in form of a list
@@ -155,8 +155,8 @@ status(timeIn, timeOut){
     if (timeIn!=='' && timeOut!==''){
       return 'present'
     }
-    else
-      return 'absent'
+    else if(timeIn!=='' && timeOut==='')
+      return 'mispunch'
   }
 
       

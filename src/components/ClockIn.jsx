@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
-import {momentRef} from '../firebase';
+import {momentRef,firebaseApp} from '../firebase';
 import MomentList from './MomentList';
+import MonthSelect from './MonthSelect';
+import Entries from './Entries';
 import {connect} from 'react-redux';
-import {callmoment} from '../actions';
-import {useraddress} from '../actions';
-import {firebaseApp} from '../firebase';
+import {Link} from 'react-router';
+import {callmoment,useraddress} from '../actions';
 import _ from 'lodash';
 import Calendars from './Calendars';
 import moment from 'moment';
@@ -34,6 +35,8 @@ class ClockIn extends Component{
 
 
   }
+  
+
 
   constructor(props){
     super(props);
@@ -45,9 +48,7 @@ class ClockIn extends Component{
       clockValue: 'clockin'
     }
     this.renderButton= this.renderButton.bind(this); 
-    this.submit = this.submit.bind(this);
-    //this.clockIn= this.clockIn.bind(this);
-    //this.clockedInOK = this.clockedInOK.bind(this);
+    
   }
 
   renderButton(){
@@ -57,7 +58,7 @@ class ClockIn extends Component{
         <button
           className='btn btn-success'
           type='button'
-          onClick={()=>{this.clockIn()}}
+          onClick={()=>{this.geolocation()}}
         >
         Clock-In
         </button>
@@ -75,7 +76,34 @@ class ClockIn extends Component{
         )
     }
   }
-  
+
+
+geolocation(){
+  if (navigator.geolocation) {
+
+          navigator.geolocation.getCurrentPosition((position) => {
+            
+            console.log(`Got location: ${position.coords.latitude}, ${position.coords.longitude}`);
+            const latitude= `${position.coords.latitude}`;
+            const longitude = `${position.coords.longitude}`;
+            console.log(latitude, longitude);   //got the latitude and longitude
+            
+             
+          //geocode for converting those coordinates to human readable address
+            Geocode.fromLatLng(latitude, longitude).then(
+              response=>{
+                const address = response.results[0].formatted_address;
+                console.log(address);
+                this.props.useraddress(address);
+                this.clockIn();
+              },
+              error=>{
+                console.error(error);
+              }
+            );
+        })
+      }
+}
 
   clockIn(){
     var date=new Date();    //put condition that if clockInDate is present in database then clockin isn't allowed right now
@@ -85,10 +113,11 @@ class ClockIn extends Component{
     var ampm = date.getHours()>=12 ? ' PM' : ' AM';
     var timi = date.getHours() + ':' + date.getMinutes()+ ':' + date.getSeconds() + ''+ampm;
     var MomentObjects= this.props.moments;
-    //._find here
+    const {address}= this.props;
     const {email}=this.props.user;
     console.log('mail',email);
   
+
       var count=0;
       MomentObjects.map(Object=>{
         if(dati===Object.clockInDate && email===Object.email){
@@ -106,9 +135,16 @@ class ClockIn extends Component{
              
        }
         else{
-          this.getLocation()
-        //this function should run according to the condition, we will use ._find funcn to search for clockinDate/email
-          this.setState({clockInDate:dati, timeIn: timi, clockValue:'clockout'})
+            //function called to get location
+           
+          this.setState({clockInDate:dati, timeIn: timi, clockValue:'clockout'}, function(){
+            const {clockInDate, timeIn}= this.state;
+            const {email}= this.props.user;
+            const {address}= this.props;
+            momentRef.push({clockInDate, timeIn, email, address});
+        
+          
+        })
         }
       
   }
@@ -123,21 +159,9 @@ clockOut(){
   var timo = date.getHours() + ':' + date.getMinutes()+ ':' + date.getSeconds() + ''+ampm;
 
   this.setState({clockOutDate:dato, timeOut: timo, clockValue:'clockin'}, function(){
-      console.log('moment', this.state);
+
+      const {timeIn, clockOutDate, timeOut} =this.state;
       
-    });
-}
-
-submit(){
-      const {clockInDate,timeIn,clockOutDate,timeOut,Latitude, Longitude} =this.state;
-      const {email} = this.props.user;
-      const {address}= this.props;
-
-      
-        //call to getLocation function above to fetch the location
-    console.log('this.state',this.state);
-     if(!(clockOutDate===''||timeOut==='')){
-
       var start = moment.utc(timeIn, "HH:mm:ss");
       var end = moment.utc(timeOut, "HH:mm:ss");                             //code for duration work hours
 
@@ -150,57 +174,36 @@ submit(){
       // format a string result
       var duration = moment.utc(+d).format('H:mm:ss');
       //const duration= timeOut- timeIn
-      momentRef.push({clockInDate, timeIn, clockOutDate, duration, timeOut, email, address});  //pushing the data to database. push address here too
-      }
+      momentRef.on('value',snap=>{
+        snap.forEach(moment=>{
+          const {clockInDate, email, timeIn} = moment.val();
+          
+          
+          const mail= this.props.user.email;
+          if(clockInDate===clockOutDate && email===mail){
+            const serverKey = moment.key;
+            //debugger
+          momentRef.child(`${serverKey}`).update({clockOutDate, timeOut, duration}); 
+          }     
+        })
+      })
 
-    else{window.alert('Please clock-out first before submit')}
-  
+          //instead of push, firebase child key update should be used here
+                      //find this serverKey
+})
 }
 
-  
-// function for getting USER LOCATION   
-getLocation() {       
-    if (navigator.geolocation) {
-
-        navigator.geolocation.getCurrentPosition((position) => {
-          
-          console.log(`Got location: ${position.coords.latitude}, ${position.coords.longitude}`);
-          const latitude= `${position.coords.latitude}`;
-          const longitude = `${position.coords.longitude}`;
-          console.log(latitude, longitude);   //got the latitude and longitude
-          
-           
-        
-          Geocode.fromLatLng(latitude, longitude).then(
-            response=>{
-              const address = response.results[0].formatted_address;
-              console.log(address);
-              this.props.useraddress(address);
-            },
-            error=>{
-              console.error(error);
-            }
-          );
-         
-          
-      })
-      
-      
-    }
-    
-  }
-   
 
 signOut(){
   if(window.confirm('Are you sure you want to Sign-out'))
     firebaseApp.auth().signOut();
   }
-
+ 
   render(){
       const {clockInDate,timeIn,clockOutDate,timeOut} =this.state;
       const {email} = this.props.user;
-
-
+ 
+ 
       console.log('this.props', this.props);
 
       //console.log(this.props);
@@ -214,21 +217,31 @@ signOut(){
                <button type="button" class="btn btn-danger btn-sm" onClick={()=>this.signOut()}>
                       <span className="glyphicon glyphicon-off"></span>  
                </button>
+          <span>
+              <Link to='/entries' Component={Entries}>
+                <button
+                className='btn btn-basic pull-right'
+                type='button'
+                style={{marginRight:'10px', marginLeft:'10px'}}
+                >
+                Today's Entries
+                </button>
+              </Link>
+          
+            <span style={{float:'right'}}>
+              <MonthSelect/>
+            </span>
+          </span>
            
         </div>
+        
+        
 
         <br/>
         <hr/>
 
        <div>{this.renderButton()}</div>
-        <div>Clock-In  : {clockInDate} {timeIn}</div>
-        <div>Clock-Out : {clockOutDate} {timeOut}</div> 
-        <button 
-            className='btn btn-primary btn-sm'
-            onClick={()=>this.submit()}
-        >
-            Submit
-        </button>
+        
         <hr/>
         <MomentList clockOutDate={clockOutDate} clockInDate={clockInDate} timeOut={timeOut} timeIn={timeIn}/> <Calendars/>
       </div>

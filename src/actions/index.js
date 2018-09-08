@@ -1,7 +1,6 @@
-import {SET_USER} from '../constants';
-import {SET_MOMENT} from '../constants';
-import {SET_MONTH} from '../constants';
-import {SET_ADDRESS} from '../constants';
+
+import {SET_USER, SET_ADDRESS, SET_MONTH, SET_MOMENT} from '../constants';
+
 
 export function logUser(email){
   return{

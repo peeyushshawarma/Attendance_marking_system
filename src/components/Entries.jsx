@@ -3,7 +3,6 @@ import {momentRef} from '../firebase';
 import {callmoment} from '../actions';
 import {connect} from 'react-redux';
 import moment from 'moment';
-//import _ from 'lodash';
 import {Link} from 'react-router';
 
 class Entries extends Component{
