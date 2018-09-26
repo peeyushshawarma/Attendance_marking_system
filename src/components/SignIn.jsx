@@ -23,7 +23,7 @@ class SignIn extends Component{
   }
   render(){
     return(
-        <div align='center'>
+        <div className="sign-In-main">
           <h2>sign in</h2>
           <div className='form-inline'>
             <div className='form-group'>

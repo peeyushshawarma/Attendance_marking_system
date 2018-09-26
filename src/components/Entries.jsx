@@ -10,12 +10,12 @@ class Entries extends Component{
   showrows(){
     var dateToday = moment().format("M/D/YYYY");
     var datesToday = moment(dateToday).format("MMM DD YYYY");
-    console.log('dates',dateToday);
+    //console.log('dates',dateToday);
     var rows=this.props.moments.map(moment=>{
         
         if(moment.clockInDate===dateToday){
           const {clockInDate, timeIn, timeOut, email, duration, address}=moment;
-          console.log('clockInDate, timeIn, timeOut, email, duration, address',clockInDate, timeIn, timeOut, email, duration, address);
+      //    console.log('clockInDate, timeIn, timeOut, email, duration, address',clockInDate, timeIn, timeOut, email, duration, address);
           
           return (
             <tr>
@@ -56,7 +56,7 @@ class Entries extends Component{
     })
   }
   render(){
-    console.log('this.props',this.props);
+    //console.log('this.props',this.props);
     // // let dates= moment().date('MM/DD/YYYY');
     // // let dateToday= moment(dates).format('MM/DD/YYYY');
     // console.log('dateToday',dateToday); //  08/31/2018
@@ -64,7 +64,7 @@ class Entries extends Component{
     return(
       <div>
         <Link to='/admin'>Back</Link>
-        <h2>these are the entries</h2>
+        <h2>Today's entries</h2>
         <table className='table table-bordered table hover table-striped'>
         <thead>
           <tr>

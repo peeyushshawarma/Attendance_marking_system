@@ -12,7 +12,7 @@ import {Provider} from 'react-redux';
 import {createStore} from 'redux';
 import {browserHistory, Router, Route} from 'react-router';
 
-const store =createStore(reducer);
+export const store =createStore(reducer);
 
 firebaseApp.auth().onAuthStateChanged(user=>{
   if(user){
@@ -34,16 +34,20 @@ firebaseApp.auth().onAuthStateChanged(user=>{
   }
 })
 
+function render(){
+  ReactDOM.render(
+    <Provider store={store}>
+      <Router path='/' history={browserHistory}>
+        <Route path='/app' component={App}/>
+        <Route path='/signin' component={SignIn}/>
+        <Route path='/signup' component={SignUp}/>
+        <Route path='/admin' component={AdminPage} />
+        <Route path='/entries' component={Entries} />
 
-ReactDOM.render(
-  <Provider store={store}>
-    <Router path='/' history={browserHistory}>
-      <Route path='/app' component={App}/>
-      <Route path='/signin' component={SignIn}/>
-      <Route path='/signup' component={SignUp}/>
-      <Route path='/admin' component={AdminPage} />
-      <Route path='/entries' component={Entries} />
+      </Router>
+    </Provider>,document.getElementById('root')
+    );
+}
 
-    </Router>
-  </Provider>,document.getElementById('root')
-  );
+render();
+store.subscribe(render);

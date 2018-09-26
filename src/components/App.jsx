@@ -1,8 +1,5 @@
 import React,{Component} from 'react';
 import ClockIn from './ClockIn';
-
-
-
 import {firebaseApp} from '../firebase';
 
  

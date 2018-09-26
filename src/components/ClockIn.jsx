@@ -2,14 +2,13 @@ import React, {Component} from 'react';
 import {momentRef,firebaseApp} from '../firebase';
 import MomentList from './MomentList';
 import MonthSelect from './MonthSelect';
-import Entries from './Entries';
 import {connect} from 'react-redux';
-import {Link} from 'react-router';
 import {callmoment,useraddress} from '../actions';
 import _ from 'lodash';
 import Calendars from './Calendars';
 import moment from 'moment';
 import Geocode from 'react-geocode';
+
 
 
  
@@ -23,10 +22,10 @@ class ClockIn extends Component{
 
       let moments=[];
       snap.forEach(momento=>{
-        const {clockInDate, timeIn, timeOut, clockOutDate} =momento.val();
+        const {clockInDate,duration, timeIn, address, timeOut, clockOutDate, email} =momento.val();
         const serverKey=momento.key;
 
-        moments.push({clockInDate, timeIn, serverKey,timeOut,clockOutDate});
+        moments.push({clockInDate, duration, timeIn, address, serverKey,timeOut,clockOutDate, email});
       })
       // console.log('momentsArray', moments);
       this.props.callmoment(moments);
@@ -83,10 +82,10 @@ geolocation(){
 
           navigator.geolocation.getCurrentPosition((position) => {
             
-            console.log(`Got location: ${position.coords.latitude}, ${position.coords.longitude}`);
+            //console.log(`Got location: ${position.coords.latitude}, ${position.coords.longitude}`);
             const latitude= `${position.coords.latitude}`;
             const longitude = `${position.coords.longitude}`;
-            console.log(latitude, longitude);   //got the latitude and longitude
+            //console.log(latitude, longitude);   //got the latitude and longitude
             
              
           //geocode for converting those coordinates to human readable address
@@ -108,15 +107,16 @@ geolocation(){
   clockIn(){
     var date=new Date();    //put condition that if clockInDate is present in database then clockin isn't allowed right now
     //and if the logged in user is also present with that clockin 
-    console.log('this.props.user.email', this.props.user.email);
+    //console.log('this.props.user.email', this.props.user.email);
     var dati = (date.getMonth()+1) + '/' + date.getDate() + '/' + date.getFullYear() ;    //moment()
     var ampm = date.getHours()>=12 ? ' PM' : ' AM';
     var timi = date.getHours() + ':' + date.getMinutes()+ ':' + date.getSeconds() + ''+ampm;
-    var MomentObjects= this.props.moments;
+    
     const {address}= this.props;
     const {email}=this.props.user;
-    console.log('mail',email);
-  
+    //console.log('mail',email);
+    
+    var MomentObjects= this.props.moments;
 
       var count=0;
       MomentObjects.map(Object=>{
@@ -129,7 +129,7 @@ geolocation(){
         if(count!==0){
           this.setState({clockInDate:'', timeIn:'' ,clockValue:'clockin', clockOutDate:'', timeOut:''}, function(){
            return(
-            window.alert('Already Clocked-in today')
+            window.alert('Already Clocked-in today!!!')
           ) 
           })
              
@@ -137,11 +137,11 @@ geolocation(){
         else{
             //function called to get location
            
-          this.setState({clockInDate:dati, timeIn: timi, clockValue:'clockout'}, function(){
-            const {clockInDate, timeIn}= this.state;
+          this.setState({clockInDate:dati, timeIn: timi, clockValue:'clockout', timeOut:'', clockOutDate:''}, function(){
+            const {clockInDate, timeIn, timeOut, clockOutDate}= this.state;
             const {email}= this.props.user;
             const {address}= this.props;
-            momentRef.push({clockInDate, timeIn, email, address});
+            momentRef.push({clockInDate, timeIn, email, address,timeOut, clockOutDate});
         
           
         })
@@ -183,13 +183,16 @@ clockOut(){
           if(clockInDate===clockOutDate && email===mail){
             const serverKey = moment.key;
             //debugger
-          momentRef.child(`${serverKey}`).update({clockOutDate, timeOut, duration}); 
+          momentRef.child(`${serverKey}`).update({duration});
+          momentRef.child(`${serverKey}`).child('clockOutDate').transaction(()=>{return clockOutDate});
+          momentRef.child(`${serverKey}`).child('timeOut').transaction(()=>{return timeOut});  //\/\/\/\/\/transaction to be used here
           }     
         })
       })
 
           //instead of push, firebase child key update should be used here
                       //find this serverKey
+                      //update added more childs to the same serverkey
 })
 }
 
@@ -199,51 +202,41 @@ signOut(){
     firebaseApp.auth().signOut();
   }
  
-  render(){
+render(){
       const {clockInDate,timeIn,clockOutDate,timeOut} =this.state;
       const {email} = this.props.user;
  
  
-      console.log('this.props', this.props);
+      //console.log('this.props', this.props);
 
-      //console.log(this.props);
-         // early state is being rendered
     return(
-      <div>
+      <div >
         
-        <div className='form-inline'>
-          
-           <h4>Welcome <em>{email}</em></h4>
-               <button type="button" class="btn btn-danger btn-sm" onClick={()=>this.signOut()}>
+        <div className='form-inline '>
+          <h2>Attendance Marking System</h2>
+           <h4 id='headingWelcome'>Welcome <em>{email}</em></h4>
+               <button type="button" className="btn btn-danger btn-sm" onClick={()=>this.signOut()}>
                       <span className="glyphicon glyphicon-off"></span>  
                </button>
           <span>
-              <Link to='/entries' Component={Entries}>
-                <button
-                className='btn btn-basic pull-right'
-                type='button'
-                style={{marginRight:'10px', marginLeft:'10px'}}
-                >
-                Today's Entries
-                </button>
-              </Link>
+              
           
             <span style={{float:'right'}}>
-              <MonthSelect/>
+              <MonthSelect moments={this.props.moments} />
             </span>
           </span>
-           
+           <br/>
+          <hr/>
         </div>
         
         
 
-        <br/>
-        <hr/>
+        
 
        <div>{this.renderButton()}</div>
         
         <hr/>
-        <MomentList clockOutDate={clockOutDate} clockInDate={clockInDate} timeOut={timeOut} timeIn={timeIn}/> <Calendars/>
+        <MomentList  moments={this.props.moments} clockOutDate={clockOutDate} clockInDate={clockInDate} timeOut={timeOut} timeIn={timeIn}/> <Calendars/>
       </div>
     );  
   }

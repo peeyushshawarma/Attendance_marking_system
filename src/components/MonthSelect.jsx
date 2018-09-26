@@ -24,7 +24,7 @@ class MonthSelect extends Component{
 
   
   render(){
-    console.log('this.props', this.props);
+   // console.log('this.props', this.props);
    
      var m = moment();
      var months=[];
@@ -36,14 +36,14 @@ class MonthSelect extends Component{
     }
     
     return(
-        <DropdownButton title='Month'
+        <DropdownButton title='Month' id='MenuItem'
         
         >
             {
                 months.map((element,index)=>{
 
                     return(
-                        <MenuItem eventKey={index} onSelect={()=>this.selectAlert({element})}
+                        <MenuItem key={index} onSelect={()=>this.selectAlert({element})}
                         >
                             {element}
                         </MenuItem>  

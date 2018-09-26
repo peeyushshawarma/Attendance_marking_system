@@ -19,31 +19,15 @@ class Calendars extends Component{
       datesArray:[]
     }
   } 
-// Render the Calendar
-  componentDidMount(){
-    momentRef.on('value', snap=>{
-       let moments=[];
-      snap.forEach(momento=>{
-        const {clockInDate, timeIn, timeOut, clockOutDate,email} =momento.val();
-        const serverKey=momento.key;
-
-        moments.push({clockInDate, timeIn, serverKey,timeOut,clockOutDate, email});
-      })
-      
-      this.props.callmoment(moments);
-  
-    })
-  }       ///this.props.moments.email===this.props.user.email..........
- 
 
 
 render(){
-  console.log('this.props',this.props);
+  //console.log('this.props',this.props);
   var today = new Date();
 
-  console.log(today);
+  //console.log(today);
   var lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-  console.log('lastWeek',lastWeek);
+  //console.log('lastWeek',lastWeek);
 
   let thatDays=[];
   const mail= this.props.user.email;
@@ -61,7 +45,7 @@ render(){
 
   })
   //this.setState({datesArray:thatDays})
-  console.log('thatDays',thatDays);
+  //console.log('thatDays',thatDays);
 
   const MultipleDatesCalendar = withMultipleDates(Calendar);
 
